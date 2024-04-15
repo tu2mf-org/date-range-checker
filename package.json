@@ -1,6 +1,6 @@
 {
   "name": "date-range-checker",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A utility library for comparing date ranges",
   "main": "dist/cjs/index.js",
   "module": "dist/mjs/index.js",
