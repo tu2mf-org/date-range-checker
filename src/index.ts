@@ -1,7 +1,5 @@
-interface DateRange {
-    startDate: Date;
-    endDate: Date;
-}
+import { DateRange } from "./type/type";
+import { findDateRangeEachDates } from "./util";
 
 class DateRangeCheckerError extends Error {
     constructor(message: string) {
@@ -182,6 +180,120 @@ function isStartDateAndEndDateIncludeRange(referenceDateRange: DateRange, compar
 }
 
 /**
+ * @name findoverlappingDates
+ * @category Date Range Helpers
+ * @summary Finds overlapping dates between two date ranges.
+ * 
+ * @description
+ * This function returns an array of dates that overlap between the given reference date range and comparison date range.
+ * If there is no overlap, an empty array is returned.
+ * Throws an error if the date range format is incorrect.
+ * 
+ * @param {DateRange} referenceDateRange - The reference date range.
+ * @param {DateRange} comparisonDateRange - The comparison date range.
+ * @returns {Date[]} An array of overlapping dates found within the overlapping period of the two date ranges.
+ * @throws {DateRangeCheckerError} Throws an error if the date range format is incorrect.
+ * 
+ * @example
+ * const overlappingDates = findOverlappingDates(
+ *   { startDate: new Date('2022-01-01'), endDate: new Date('2022-01-10') },
+ *   { startDate: new Date('2022-01-05'), endDate: new Date('2022-01-15') }
+ * );
+ * //=> [
+ * //     new Date('2022-01-05'),
+ * //     new Date('2022-01-06'),
+ * //     new Date('2022-01-07'),
+ * //     new Date('2022-01-08'),
+ * //     new Date('2022-01-09'),
+ * //     new Date('2022-01-10')
+ * //   ]
+ */
+function findOverlappingDates(referenceDateRange: DateRange, comparisonDateRange: DateRange): Date[] {
+    checkDateRangeFormat(referenceDateRange);
+    checkDateRangeFormat(comparisonDateRange);
+
+    if (!isInRange(referenceDateRange, comparisonDateRange)) {
+        return [];
+    }
+
+    const startDate = referenceDateRange.startDate.getTime() > comparisonDateRange.startDate.getTime() ? new Date(referenceDateRange.startDate) : new Date(comparisonDateRange.startDate);
+    const endDate = referenceDateRange.endDate.getTime() < comparisonDateRange.endDate.getTime() ? new Date(referenceDateRange.endDate) : new Date(comparisonDateRange.endDate);
+
+    return [
+        ...findDateRangeEachDates({startDate, endDate})
+    ]
+}
+
+/**
+ * @name findNonOverlappingDates
+ * @category Date Range Helpers
+ * @summary Finds non overlapping dates between two date ranges.
+ * 
+ * @description
+ * This function returns an array of dates that non overlapping between the given reference date range and comparison date range.
+ * If two date ranges are same, return empty array.
+ * Throws an error if the date range format is incorrect.
+ * 
+ * @param {DateRange} referenceDateRange - The reference date range.
+ * @param {DateRange} comparisonDateRange - The comparison date range.
+ * @returns {Date[]} An array of overlapping dates found within the overlapping period of the two date ranges.
+ * @throws {DateRangeCheckerError} Throws an error if the date range format is incorrect.
+ * 
+ * @example
+ * const nonOverlappingDates = findNonOverlappingDates(
+ *   { startDate: new Date('2022-01-01'), endDate: new Date('2022-01-10') },
+ *   { startDate: new Date('2022-01-05'), endDate: new Date('2022-01-15') }
+ * );
+ * //=> [
+ * //     new Date('2022-01-01'),
+ * //     new Date('2022-01-02'),
+ * //     new Date('2022-01-03'),
+ * //     new Date('2022-01-04'),
+ * //     new Date('2022-01-11'),
+ * //     new Date('2022-01-12')
+ * //     new Date('2022-01-13')
+ * //     new Date('2022-01-14')
+ * //     new Date('2022-01-15')
+ * //   ]
+ */
+function findNonOverlappingDates(referenceDateRange: DateRange, comparisonDateRange: DateRange): Date[] {
+    checkDateRangeFormat(referenceDateRange);
+    checkDateRangeFormat(comparisonDateRange);
+
+    if (!isInRange(referenceDateRange, comparisonDateRange)) {
+        return [
+            ...findDateRangeEachDates({
+                startDate: referenceDateRange.startDate,
+                endDate: referenceDateRange.endDate
+            }),
+            ...findDateRangeEachDates({
+                startDate: comparisonDateRange.startDate,
+                endDate: comparisonDateRange.endDate
+            })
+        ];
+    }
+
+    const firstStartDate = referenceDateRange.startDate.getTime() < comparisonDateRange.startDate.getTime() ? new Date(referenceDateRange.startDate) : new Date(comparisonDateRange.startDate);
+    const firstEndDate = firstStartDate.getTime() === referenceDateRange.startDate.getTime() ? new Date(comparisonDateRange.startDate) : new Date(referenceDateRange.startDate);
+    firstEndDate.setDate(firstEndDate.getDate() - 1);
+
+    const secondStartDate = referenceDateRange.endDate.getTime() < comparisonDateRange.endDate.getTime() ? new Date(referenceDateRange.endDate) : new Date(comparisonDateRange.endDate);
+    const secondEndDate = secondStartDate.getTime() == referenceDateRange.endDate.getTime() ? new Date(comparisonDateRange.endDate) : new Date(referenceDateRange.endDate);
+    secondStartDate.setDate(secondStartDate.getDate() + 1)
+
+    return [
+        ...findDateRangeEachDates({
+            startDate: firstStartDate,
+            endDate: firstEndDate
+        }),
+        ...findDateRangeEachDates({
+            startDate: secondStartDate,
+            endDate: secondEndDate
+        })
+    ]
+}
+
+/**
  * @name checkDateRangeFormat
  * @category Date Range Helpers
  * @summary Checks if the provided object adheres to the expected date range format.
@@ -220,5 +332,7 @@ export {
     isEndDateInRange,
     isStartDateAndEndDateInRange,
     isStartDateAndEndDateIncludeRange,
+    findOverlappingDates,
+    findNonOverlappingDates,
     DateRangeCheckerError
 }
