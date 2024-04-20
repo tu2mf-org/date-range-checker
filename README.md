@@ -51,6 +51,8 @@ isStartDateInRange                         | (referenceDateRange: DateRange, com
 isEndDateInRange                           | (referenceDateRange: DateRange, comparisonDateRange: DateRange) | boolean | Checks if the end date of the reference range is within the comparison range.
 isStartDateAndEndDateInRange               | (referenceDateRange: DateRange, comparisonDateRange: DateRange) | boolean | Checks if both start and end dates of the reference range are within the comparison range.
 isStartDateAndEndDateIncludeRange          | (referenceDateRange: DateRange, comparisonDateRange: DateRange) | boolean | Checks if both start and end dates of the reference range include the comparison range.
+findOverlappingDates                       | (referenceDateRange: DateRange, comparisonDateRange: DateRange) | Date[]  | Returns an array of dates that overlap between the given reference date range and comparison date range.
+findNonOverlappingDates                    | (referenceDateRange: DateRange, comparisonDateRange: DateRange) | Date[]  | Returns an array of dates that non overlapping between the given reference date range and comparison date range.
 
 ## Contributing
 Contributions are welcome! Read [contributing guide](CONTRIBUTING.md)
